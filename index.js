@@ -4,6 +4,7 @@ const socket = dgram.createSocket("udp4");
 const PORT = 38899;
 const HOST = "10.0.20.166";
 const refreshSeconds = 60;
+const betterColorMode = true;
 
 console.clear();
 console.log("hi");
@@ -65,6 +66,13 @@ async function getColor() {
   console.log("Value:", value);
   console.log("Color Hex:", colorHex);
   console.log("Color RGB:", colorRGB);
+
+  if (betterColorMode) {
+    const betterColor = makeColorBetter(colorRGB);
+    console.log("Better RGB:", betterColor);
+    sendNewCOlor(betterColor);
+    return;
+  }
 
   sendNewCOlor(colorRGB[0], colorRGB[1], colorRGB[2]);
 }
@@ -158,4 +166,16 @@ function sendNewCOlor(r, g, b) {
     }
     // socket.close();
   });
+}
+
+function makeColorBetter(rgb) {
+  // Get hgihest of 3
+  const maxColor = Math.max(rgb[0], rgb[1], rgb[2]);
+  if (maxColor === 0) return [0, 0, 0];
+  const scale = 255 / maxColor;
+  return [
+    Math.min(255, Math.round(rgb[0] * scale)),
+    Math.min(255, Math.round(rgb[1] * scale)),
+    Math.min(255, Math.round(rgb[2] * scale)),
+  ];
 }
