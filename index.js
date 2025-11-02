@@ -156,6 +156,6 @@ function sendNewCOlor(r, g, b) {
     } else {
       console.log(`Message sent to ${HOST}:${PORT}`);
     }
-    socket.close();
+    // socket.close();
   });
 }
