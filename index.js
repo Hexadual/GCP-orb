@@ -7,9 +7,9 @@ const HOST = '127.0.0.1';
 const message = JSON.stringify({
   method: "setPilot",
   params: {
-    r: 255,
-    g: 100,
-    b: 0,
+    r: 0,
+    g: 0,
+    b: 255,
     dimming: 100
   }
 });
