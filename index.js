@@ -3,7 +3,7 @@ import dgram from "dgram";
 const socket = dgram.createSocket("udp4");
 const PORT = 38899;
 const HOST = "10.0.20.166";
-const refreshSeconds = 5;
+const refreshSeconds = 60;
 
 console.clear();
 console.log("hi");
@@ -146,7 +146,7 @@ function sendNewCOlor(r, g, b) {
       r,
       g,
       b,
-      dimming: 50,
+      dimming: 10,
     },
   });
 
