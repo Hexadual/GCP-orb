@@ -1,8 +1,8 @@
 import dgram from 'dgram';
 
 const socket = dgram.createSocket('udp4');
-const PORT = 8000;
-const HOST = '127.0.0.1';
+const PORT = 38899;
+const HOST = '10.0.20.166';
 
 const message = JSON.stringify({
   method: "setPilot",
@@ -10,7 +10,7 @@ const message = JSON.stringify({
     r: 0,
     g: 0,
     b: 255,
-    dimming: 100
+    dimming: 50
   }
 });
 
