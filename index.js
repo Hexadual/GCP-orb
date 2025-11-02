@@ -70,10 +70,11 @@ async function getColor() {
   if (betterColorMode) {
     const betterColor = makeColorBetter(colorRGB);
     console.log("Better RGB:", betterColor);
-    sendNewCOlor(betterColor);
-  } else {
-    sendNewCOlor(colorRGB[0], colorRGB[1], colorRGB[2]);
+    sendNewCOlor(betterColor[0], betterColor[1], betterColor[2]);
+    return;
   }
+
+  sendNewCOlor(colorRGB[0], colorRGB[1], colorRGB[2]);
 }
 
 const dotElements = [
