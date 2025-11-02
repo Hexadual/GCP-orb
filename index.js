@@ -1,27 +1,9 @@
-import dgram from 'dgram';
+import dgram from "dgram";
 
-const socket = dgram.createSocket('udp4');
+const socket = dgram.createSocket("udp4");
 const PORT = 38899;
-const HOST = '10.0.20.166';
-
-const message = JSON.stringify({
-  method: "setPilot",
-  params: {
-    r: 0,
-    g: 0,
-    b: 255,
-    dimming: 50
-  }
-});
-
-socket.send(message, PORT, HOST, (err) => {
-  if (err) {
-    console.error('Send error:', err);
-  } else {
-    console.log(`Message sent to ${HOST}:${PORT}`);
-  }
-  socket.close();
-});
+const HOST = "10.0.20.166";
+const refreshSeconds = 5;
 
 console.clear();
 console.log("hi");
@@ -83,6 +65,8 @@ async function getColor() {
   console.log("Value:", value);
   console.log("Color Hex:", colorHex);
   console.log("Color RGB:", colorRGB);
+
+  sendNewCOlor(colorRGB[0], colorRGB[1], colorRGB[2]);
 }
 
 const dotElements = [
@@ -151,6 +135,27 @@ function hexToRgb(hex) {
 getColor();
 
 setInterval(async () => {
-  // console.clear()
-  // getColor();
-}, 1000)
+  console.clear();
+  getColor();
+}, refreshSeconds * 1000);
+
+function sendNewCOlor(r, g, b) {
+  const message = JSON.stringify({
+    method: "setPilot",
+    params: {
+      r,
+      g,
+      b,
+      dimming: 50,
+    },
+  });
+
+  socket.send(message, PORT, HOST, (err) => {
+    if (err) {
+      console.error("Send error:", err);
+    } else {
+      console.log(`Message sent to ${HOST}:${PORT}`);
+    }
+    socket.close();
+  });
+}
