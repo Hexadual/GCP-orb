@@ -1,13 +1,14 @@
 import dgram from "dgram";
 
 const socket = dgram.createSocket("udp4");
-const PORT = 38899;
-const HOST = "10.0.20.166";
-const refreshSeconds = 60;
-const betterColorMode = true;
+const PORT = process.env.PORT;
+const HOST = process.env.HOST;
+const refreshSeconds = process.env.refreshSeconds;
+const betterColorMode = process.env.betterColorMode;
+const lightDimming = parseInt(process.env.lightDimming);
 
 console.clear();
-console.log("hi");
+// console.log("hi");
 
 const dataSource = "https://global-mind.org/gcpdot/gcpindex.php";
 
@@ -154,7 +155,7 @@ function sendNewCOlor(r, g, b) {
       r,
       g,
       b,
-      dimming: 10,
+      dimming: lightDimming,
     },
   });
 
@@ -173,6 +174,8 @@ function makeColorBetter(rgb) {
   const maxColor = Math.max(rgb[0], rgb[1], rgb[2]);
   if (maxColor === 0) return [0, 0, 0];
   const scale = 255 / maxColor;
+  // Temp fix for getting better greens
+  if (rgb[1] > rgb[2]) rgb[2] = 10;
   return [
     Math.min(255, Math.round(rgb[0] * scale)),
     Math.min(255, Math.round(rgb[1] * scale)),
