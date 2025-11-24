@@ -1,3 +1,4 @@
+import { time } from "console";
 import dgram from "dgram";
 
 const socket = dgram.createSocket("udp4");
@@ -12,70 +13,81 @@ console.clear();
 
 const dataSource = "https://global-mind.org/gcpdot/gcpindex.php";
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function getColor() {
-  const res = await fetch(
-    `${dataSource}?current=1&nonce=${Math.round(Math.random() * 10000000)}`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "text/plain" },
+  try {
+    const res = await fetch(
+      `${dataSource}?current=1&nonce=${Math.round(Math.random() * 10000000)}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "text/plain" },
+      }
+    );
+
+    const data = await res.text();
+    // console.log(data);
+
+
+    const p = /<serverTime>([\d.]+)/im;
+    const pi = /<s t='([\d]+)'>([\d.]+)/gim;
+    var r;
+
+    const nextData = [];
+    const serverTime = p.exec(data)[1];
+
+    const offsetTime = serverTime - Date.now() / 1000 - 60.0;
+
+    do {
+      if ((r = pi.exec(data))) {
+        nextData[r[1]] = r[2];
+      }
+    } while (r);
+
+    let value = nextData[serverTime];
+    if (value < 0) value = 0;
+    if (value > 1) value = 1;
+
+    // Determine color based on value
+    let selectedColor = dotElements[0]; // Default color
+    // What % is within the color ranges
+    let lerpFactor = 0.0;
+
+    for (let i = 0; i < colors.length - 1; i++) {
+      if (value >= colors[i].tail && value <= colors[i + 1].tail) {
+        selectedColor = colors[i].mc;
+        const range = colors[i + 1].tail - colors[i].tail;
+        lerpFactor = (value - colors[i].tail) / range;
+        break;
+      }
     }
-  );
 
-  const data = await res.text();
-  // console.log(data);
+    const colorHex = lerpColor(
+      selectedColor.color1,
+      selectedColor.color2,
+      lerpFactor
+    );
+    const colorRGB = hexToRgb(colorHex);
 
-  const p = /<serverTime>([\d.]+)/im;
-  const pi = /<s t='([\d]+)'>([\d.]+)/gim;
-  var r;
+    console.log("Value:", value);
+    console.log("Color Hex:", colorHex);
+    console.log("Color RGB:", colorRGB);
 
-  const nextData = [];
-  const serverTime = p.exec(data)[1];
-
-  const offsetTime = serverTime - Date.now() / 1000 - 60.0;
-
-  do {
-    if ((r = pi.exec(data))) {
-      nextData[r[1]] = r[2];
+    if (betterColorMode) {
+      const betterColor = makeColorBetter(colorRGB);
+      console.log("Better RGB:", betterColor);
+      sendNewCOlor(betterColor[0], betterColor[1], betterColor[2]);
+      return;
     }
-  } while (r);
 
-  let value = nextData[serverTime];
-  if (value < 0) value = 0;
-  if (value > 1) value = 1;
-
-  // Determine color based on value
-  let selectedColor = dotElements[0]; // Default color
-  // What % is within the color ranges
-  let lerpFactor = 0.0;
-
-  for (let i = 0; i < colors.length - 1; i++) {
-    if (value >= colors[i].tail && value <= colors[i + 1].tail) {
-      selectedColor = colors[i].mc;
-      const range = colors[i + 1].tail - colors[i].tail;
-      lerpFactor = (value - colors[i].tail) / range;
-      break;
-    }
+    sendNewCOlor(colorRGB[0], colorRGB[1], colorRGB[2]);
+  } catch (err) {
+    console.log('Error:', err);
+    await sleep(1000);
+    getColor();
   }
-
-  const colorHex = lerpColor(
-    selectedColor.color1,
-    selectedColor.color2,
-    lerpFactor
-  );
-  const colorRGB = hexToRgb(colorHex);
-
-  console.log("Value:", value);
-  console.log("Color Hex:", colorHex);
-  console.log("Color RGB:", colorRGB);
-
-  if (betterColorMode) {
-    const betterColor = makeColorBetter(colorRGB);
-    console.log("Better RGB:", betterColor);
-    sendNewCOlor(betterColor[0], betterColor[1], betterColor[2]);
-    return;
-  }
-
-  sendNewCOlor(colorRGB[0], colorRGB[1], colorRGB[2]);
 }
 
 const dotElements = [
